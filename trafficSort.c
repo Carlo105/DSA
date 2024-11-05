@@ -26,17 +26,13 @@ Lane newLane(char *lname, int prio, int sec){
 
 bool enqueue(heapLane * h, Lane l){
 	FILE *fp;
-	
 	fp = fopen("traffic.dat", "rb");
-	
-	size_t itemsRead;
     int i = 0;
     while (fread(&l, sizeof(Lane), 1, fp)) {
-        // Print lane name of each read entry
         printf("Lane %d: %s\n", i, l.laneName);
         i++;
-		h->list[l.prio] = l;
-		
+		h->list[l.prio-1] = l;
+		h->count++;
         // Stop if the array is full
         if (i >= 10) {
             break;
@@ -47,21 +43,20 @@ bool enqueue(heapLane * h, Lane l){
 
 int countSeconds(heapLane l, char *string){
 	int retval=0, i;
-	
-	for(i=0; i<10 && strcmp(string, l.list[i].laneName)!=0; i++){
+	for(i=0; i<l.count && strcmp(string, l.list[i].laneName)!=0; i++){
 		retval+=l.list[i].seconds;
 		printf("[%d] = %d\n", i, retval);
 	}
-	retval=retval + l.list[i+1].seconds;
-	printf("[%d] = %d\n", i, retval);
-	return retval;
+	return retval+=l.list[i].seconds;
 }
 
 int main(){
 	Lane list[10];
 	heapLane l;
+	char string[20];
+	strcpy(string, "Diversion Left");
 	l.count = 0;
 	enqueue(&l, list[0]);
-	printf("\nHeres the total amount of seconds to reach Pedestrian Diversion: %d",countSeconds(l, "Diversion Pedestrian"));
+	printf("\nHeres the total amount of seconds to reach %s: %d", string,countSeconds(l, string));
 	return 0;
 }
